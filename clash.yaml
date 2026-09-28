@@ -1,0 +1,592 @@
+# ============================================================
+# Clash / Mihomo 终极优化配置文件 (深度整合版)
+# ============================================================
+
+# --- 端口定义 ---
+mixed-port: 7893
+port: 7890
+socks-port: 7891
+redir-port: 7892
+tproxy-port: 7895
+
+# --- 基础运行设置 ---
+mode: rule
+log-level: warning
+allow-lan: true
+bind-address: "*"
+ipv6: true
+unified-delay: true
+tcp-concurrent: true
+keep-alive-idle: 600
+keep-alive-interval: 30
+enable-process: true
+find-process-mode: strict
+client-fingerprint: chrome
+
+# --- 控制面板 ---
+external-controller: 0.0.0.0:9090
+external-ui: ui
+secret: "Akun"
+max-failed-times: 5
+
+# --- 存储持久化 ---
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# --- 实验性设置 ---
+experimental:
+  ignore-resolve-fail: true
+  tracing: false
+  quic-go-disable-gso: false
+
+# ============================================================
+# NTP 时间同步 (借鉴优化：确保 TLS 握手与证书验证无误)
+# ============================================================
+ntp:
+  enable: true
+  write-to-system: true
+  server: time.apple.com
+  server-port: 123
+  interval: 30
+
+# ============================================================
+# 本地 Hosts
+# ============================================================
+hosts:
+  "localhost": 127.0.0.1
+  "sm.localhost": 127.0.0.1
+  "localhost.v.qq.com": 127.0.0.1
+  "localhost.weixin.qq.com": 127.0.0.1
+  "localhost.ptlogin2.qq.com": 127.0.0.1
+  "localhost.wechat.com": 127.0.0.1
+  "localhost.sogo.com": 127.0.0.1
+  "localhost.iqiyi.com": 127.0.0.1
+  "localhost.youku.com": 127.0.0.1
+  "localhost.bilibili.com": 127.0.0.1
+  "localhost.mgtv.com": 127.0.0.1
+  "localhost.le.com": 127.0.0.1
+  "localhost.pptv.com": 127.0.0.1
+  "localhost.sohu.com": 127.0.0.1
+  "localhost.tudou.com": 127.0.0.1
+  "localhost.douyin.com": 127.0.0.1
+  "localhost.kuaishou.com": 127.0.0.1
+
+# ============================================================
+# 域名嗅探 (Sniffer) - 【优化：跳过国内与私有规则集，精准解析纯 IP】
+# ============================================================
+sniffer:
+  enable: true
+  override-destination: false
+  force-dns-mapping: false # 【借鉴优化】避免错误映射
+  parse-pure-ip: true      # 【借鉴优化】精准处理纯 IP 流量
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.netflix.com"
+    - "+.nflxvideo.net"
+    - "+.amazonaws.com"
+    - "+.media.dssott.com"
+  skip-domain:
+    - "rule-set:private_domain,cn_domain"
+    - "Mijia Cloud"
+    - "dlg.io.mi.com"
+    - "+.oray.com"
+    - "+.sunlogin.net"
+    - "+.push.apple.com"
+    - "+.wechat.com"
+    - "+.qq.com"
+
+# ============================================================
+# TUN 模式 - 【核心优化：国内直连完全绕过 TUN 内核，极大降低 CPU 负载】
+# ============================================================
+tun:
+  enable: true
+  stack: mixed
+  device: utun
+  auto-route: true              # 【借鉴优化】开启自动路由
+  auto-redirect: true           # 【借鉴优化】开启自动重定向
+  auto-detect-interface: true   # 【借鉴优化】开启自动检测出口网卡
+  strict-route: true
+  endpoint-independent-nat: true
+  disable-icmp-forwarding: false
+  dns-hijack:
+    - "any:53"
+    - "tcp://any:53"
+  route-exclude-address-set:
+    - cn_ip                     # 【极强优化】国内 IP 根本不进 TUN，系统底层直连，丝滑且省电
+
+# ============================================================
+# DNS 模块 - 【深度优化：全面升级 DoH 防劫持 + 彻底解决跨域与真实 IP 问题】
+# ============================================================
+dns:
+  enable: true
+  listen: 0.0.0.0:7874
+  ipv6: true
+  prefer-h3: false
+  respect-rules: true
+  enhanced-mode: fake-ip
+  fake-ip-ttl: 1                  # 【借鉴优化】缩短 Fake-IP 缓存时间，避免 DNS 污染残留
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-range6: fc00::/18
+  fake-ip-filter-mode: blacklist
+  use-hosts: true
+  use-system-hosts: false
+  cache-algorithm: arc
+
+  # 【优化】全面废弃明文 DNS，采用加密 DoH，防止运营商劫持和抢答
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 114.114.114.114
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+  direct-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://doh.pub/dns-query
+
+  nameserver:
+    - "https://1.1.1.1/dns-query#🚀 节点选择"
+    - "https://8.8.8.8/dns-query#🚀 节点选择"
+
+  nameserver-policy:
+    "translate.zvo.cn,yjbrowser.cn,modujx11.com,gszyi.com,ymuuy.com,+.gstatic.cn,+.googleapis.cn,+.google.cn":
+      - "https://1.1.1.1/dns-query#🚀 节点选择"
+      - "https://8.8.8.8/dns-query#🚀 节点选择"
+    "rule-set:cn_domain,private_domain":
+      - https://223.5.5.5/dns-query
+      - https://doh.pub/dns-query
+    "geosite:cn,private,apple,bytedance,tencent,alibaba,baidu":
+      - https://223.5.5.5/dns-query
+      - https://doh.pub/dns-query
+    "+.cn":
+      - https://223.5.5.5/dns-query
+      - https://doh.pub/dns-query
+
+  # 【优化】国内域名、私有网络及特殊服务强制返回真实 IP，保证 CDN 节点最优分配
+  fake-ip-filter:
+    - "rule-set:private_domain,cn_domain"
+    - "geosite:private,cn,microsoft@cn,apple@cn,steam@cn" # 【借鉴优化】增加微软、苹果、Steam 的国内 CDN 过滤
+    - "+.lan"
+    - "+.local"
+    - "+.localdomain"
+    - "+.ntp.org"
+    - "+.ntp.*.com"
+    - "+.time.*.com"
+    - "time.*.apple.com"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "connectivitycheck.gstatic.com"
+    - "connectivitycheck.android.com"
+    - "detectportal.firefox.com"
+    - "localhost.*"
+    - "+.stun.*.*"
+    - "+.stun.*.*.*"
+    - "+.stun.*.*.*.*"
+
+# ============================================================
+# 订阅设置 (Proxy-Providers)
+# ============================================================
+p-common: &p-common
+  type: http
+  interval: 86400
+  proxy: 直连
+  health-check:
+    enable: true
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    timeout: 5000
+    lazy: false
+  override:
+    packet-encoding: ""
+    client-fingerprint: "chrome"
+
+proxy-providers:
+  Airport-1:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-1.yaml
+  Airport-2:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-2.yaml
+  Airport-3:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-3.yaml
+  Airport-4:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-4.yaml
+  Airport-5:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-5.yaml
+  Airport-6:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-6.yaml
+  Airport-7:
+    <<: *p-common
+    url: "订阅地址"
+    path: ./proxies/Airport-7.yaml
+
+proxies:
+  - name: "直连"
+    type: direct
+
+my_providers: &my_providers
+  - Airport-1
+  - Airport-2
+  - Airport-3
+  - Airport-4
+  - Airport-5
+  - Airport-6
+  - Airport-7
+
+auto_select: &auto_select
+  type: url-test
+  url: https://www.gstatic.com/generate_204
+  interval: 180
+  lazy: true
+  tolerance: 60
+  timeout: 4000
+  use: *my_providers
+  exclude-filter: "(?i)aws-link|127\\.0\\.0\\.1|localhost"
+
+# ============================================================
+# 策略组
+# ============================================================
+proxy-groups:
+  # --- 手动选择 ---
+  - name: "🚀 节点选择"
+    type: fallback
+    url: https://www.gstatic.com/generate_204
+    interval: 60
+    proxies:
+      - "♻️ 香港自动"
+      - "♻️ 台湾自动"
+      - "♻️ 日本自动"
+      - "♻️ 狮城自动"
+      - "♻️ 美国自动"
+      - "♻️ 韩国自动"
+      - "♻️ 全部自动"
+      - "直连"
+
+  # --- 地区自动 ---
+  - name: "♻️ 香港自动"
+    <<: *auto_select
+    filter: "(?i)港|HK|Hong|HKG"
+    lazy: true
+
+  - name: "♻️ 台湾自动"
+    <<: *auto_select
+    filter: "(?i)台|TW|Tai|TPE"
+
+  - name: "♻️ 日本自动"
+    <<: *auto_select
+    filter: "(?i)日|JP|Japan|Tokyo|Osaka|NRT|KIX"
+
+  - name: "♻️ 狮城自动"
+    <<: *auto_select
+    filter: "(?i)SG|Singapore|新|SIN"
+
+  - name: "♻️ 美国自动"
+    <<: *auto_select
+    filter: "(?i)美|US|United|America|Los Angeles|San Jose|LAX|SJC"
+
+  - name: "♻️ 韩国自动"
+    <<: *auto_select
+    filter: "(?i)韩|KR|Korea|Seoul|ICN"
+
+  - name: "♻️ 全部自动"
+    <<: *auto_select
+
+  # --- AI 服务 ---
+  - name: "🤖 AI"
+    type: url-test
+    url: https://cp.cloudflare.com/generate_204
+    interval: 120
+    timeout: 2500
+    tolerance: 50
+    lazy: true
+    use: *my_providers
+    filter: "(?i)美|US|United States|日|JP|Japan|韩|KR"
+    exclude-filter: "(?i)港|HK|HongKong|2x|3x|aws-link|127\\.0\\.0\\.1|localhost"
+
+  - name: "💻 Copilot"
+    type: url-test
+    url: https://www.gstatic.com/generate_204
+    interval: 180
+    timeout: 5000
+    tolerance: 60
+    lazy: true
+    use: *my_providers
+    filter: "(?i)港|HK|HongKong|台|TW|Taiwan|日|JP|Japan|美|US|Singapore|新|SG"
+    exclude-filter: "(?i)2x|3x|aws-link|127\\.0\\.0\\.1|localhost"
+
+  # --- 兜底 ---
+  - name: "🐟 漏网之鱼"
+    type: select
+    proxies:
+      - "♻️ 全部自动"
+      - "直连"
+      - REJECT
+
+# ============================================================
+# 规则集 (Rule Providers)
+# ============================================================
+rule-anchor:
+  mrs_domain: &mrs_domain {type: http, interval: 86400, behavior: domain, format: mrs}
+  mrs_ip: &mrs_ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
+  yaml_class: &yaml_class {type: http, interval: 86400, behavior: classical, format: yaml}
+  yaml_domain: &yaml_domain {type: http, interval: 86400, behavior: domain, format: yaml}
+  text_class: &text_class {type: http, interval: 86400, behavior: classical, format: text}
+
+rule-providers:
+  private_domain:
+    <<: *mrs_domain
+    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs"
+    path: ./rules/private.mrs
+
+  cn_domain:
+    <<: *mrs_domain
+    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs"
+    path: ./rules/cn.mrs
+
+  cn_ip:
+    <<: *mrs_ip
+    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs"
+    path: ./rules/cn_ip.mrs
+
+  telegram_ip:
+    <<: *mrs_ip
+    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.mrs"
+    path: ./rules/telegram.mrs
+
+  OpenAI:
+    <<: *yaml_class
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml"
+    path: ./rules/OpenAI.yaml
+
+  Claude:
+    <<: *yaml_class
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Claude/Claude.yaml"
+    path: ./rules/Claude.yaml
+
+  Gemini:
+    <<: *yaml_class
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Gemini/Gemini.yaml"
+    path: ./rules/Gemini.yaml
+
+  Copilot:
+    <<: *yaml_class
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Copilot/Copilot.yaml"
+    path: ./rules/Copilot.yaml
+
+  proxy_list:
+    <<: *yaml_domain
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Proxy/Proxy_Domain.yaml"
+    path: ./rules/Proxy_Domain.yaml
+
+  gfw_list:
+    <<: *text_class
+    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ProxyGFWlist.list"
+    path: ./rules/ProxyGFWlist.list
+
+  reject_list:
+    <<: *yaml_domain
+    url: "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt"
+    path: ./rules/reject.yaml
+
+# ============================================================
+# 规则匹配 (Rules)
+# ============================================================
+rules:
+  # 1. QUIC 流量拦截（强制回退 TCP 保证网页与视频丝滑秒开）
+  - AND,((DST-PORT,443),(NETWORK,UDP)),REJECT
+
+  # 2. 广告拦截
+  - RULE-SET,reject_list,REJECT
+  - DOMAIN-SUFFIX,teg.tencent-cloud.net,REJECT
+  - DOMAIN-SUFFIX,comfylink.com,REJECT
+  - DOMAIN-SUFFIX,umeng.com,REJECT
+  - DOMAIN-SUFFIX,myapp.com,REJECT
+  - DOMAIN-SUFFIX,bizport.cn,REJECT
+  - DOMAIN-SUFFIX,dbankcloud.cn,REJECT
+  - DOMAIN-SUFFIX,dbankcloud.eu,REJECT
+  - DOMAIN-SUFFIX,xunlei.cn,REJECT
+  - DOMAIN-SUFFIX,sandai.net,REJECT
+  - DOMAIN,pre-api.miui.security.xiaomi.com,REJECT
+  - DOMAIN-SUFFIX,njmapp.com,REJECT
+  - DOMAIN-SUFFIX,360safe.com,REJECT
+  - DOMAIN-SUFFIX,360.cn,REJECT
+  - DOMAIN,tracing-analysis-dc-sg.aliyuncs.com,REJECT
+  - DST-PORT,6001,REJECT
+  - DOMAIN,sm.localhost,REJECT
+  - DOMAIN-SUFFIX,feedback.zcode-ai.com,REJECT
+  - DOMAIN-KEYWORD,localhost,REJECT
+
+  # 3. 路由器内网管理拦截/直连防御
+  - DOMAIN-SUFFIX,tenda.com.cn,REJECT
+  - DOMAIN-SUFFIX,netcore.com.cn,REJECT
+  - DOMAIN-SUFFIX,mercury.com.cn,REJECT
+  - DOMAIN-SUFFIX,phicomm.com,REJECT
+  - DOMAIN-SUFFIX,hiwifi.com,REJECT
+  - DOMAIN-SUFFIX,baikebox.com,REJECT
+  - DOMAIN-SUFFIX,360router.com.cn,REJECT
+  - DOMAIN-SUFFIX,netgear.com,REJECT
+  - DOMAIN-SUFFIX,linksys.com,REJECT
+  - DOMAIN-SUFFIX,wlink.qy.net,REJECT
+
+  # 4. 私有与内网地址（直连，免触发 DNS 污染）
+  - RULE-SET,private_domain,DIRECT
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,169.254.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,224.0.0.0/4,DIRECT,no-resolve
+  - IP-CIDR,240.0.0.0/4,DIRECT,no-resolve
+  - IP-CIDR,255.255.255.255/32,DIRECT,no-resolve
+  - IP-CIDR6,::1/128,DIRECT,no-resolve
+  - IP-CIDR6,fc00::/7,DIRECT,no-resolve
+  - IP-CIDR6,fe80::/10,DIRECT,no-resolve
+
+  # 5. 网络连通性测试与核心 DNS 服务器（直连）
+  - DOMAIN,connectivitycheck.android.com,DIRECT
+  - DOMAIN,connectivitycheck.gstatic.com,DIRECT
+  - DOMAIN,detectportal.firefox.com,DIRECT
+  - DOMAIN-SUFFIX,msftconnecttest.com,DIRECT
+  - DOMAIN-SUFFIX,msftncsi.com,DIRECT
+  - DOMAIN-SUFFIX,fastly.jsdelivr.net,DIRECT
+  - DOMAIN-SUFFIX,gcore.jsdelivr.net,DIRECT
+  - DOMAIN-SUFFIX,jsdmirror.com,DIRECT
+  - DOMAIN-SUFFIX,doh.pub,DIRECT
+  - DOMAIN-SUFFIX,alidns.com,DIRECT
+  - DOMAIN-SUFFIX,dnspod.cn,DIRECT
+  - IP-CIDR,119.29.29.29/32,DIRECT,no-resolve
+  - IP-CIDR,223.5.5.5/32,DIRECT,no-resolve
+  - IP-CIDR,114.114.114.114/32,DIRECT,no-resolve
+  - IP-CIDR6,2400:3200::1/128,DIRECT,no-resolve
+  - IP-CIDR6,2402:4e00::/128,DIRECT,no-resolve
+
+  # 6. 特殊国内域名代理（优先级高，防误判直连）
+  - DOMAIN-SUFFIX,translate.zvo.cn,🚀 节点选择
+  - DOMAIN-SUFFIX,yjbrowser.cn,🚀 节点选择
+  - DOMAIN-SUFFIX,modujx11.com,🚀 节点选择
+  - DOMAIN-SUFFIX,gszyi.com,🚀 节点选择
+  - DOMAIN-SUFFIX,ymuuy.com,🚀 节点选择
+  - DOMAIN,bf.modujx11.com,🚀 节点选择
+  - DOMAIN,gs.gszyi.com,🚀 节点选择
+  - DOMAIN,hnts.ymuuy.com,🚀 节点选择
+  - DOMAIN-SUFFIX,gstatic.cn,🚀 节点选择
+  - DOMAIN-SUFFIX,googleapis.cn,🚀 节点选择
+  - DOMAIN,client.wns.windows.com,🚀 节点选择
+
+  # 7. AI 服务分流匹配
+  - RULE-SET,OpenAI,🤖 AI
+  - RULE-SET,Claude,🤖 AI
+  - RULE-SET,Gemini,🤖 AI
+  - DOMAIN-KEYWORD,openai,🤖 AI
+  - DOMAIN-KEYWORD,chatgpt,🤖 AI
+  - DOMAIN-KEYWORD,anthropic,🤖 AI
+  - DOMAIN-KEYWORD,claude,🤖 AI
+  - DOMAIN-KEYWORD,gemini,🤖 AI
+  - DOMAIN-SUFFIX,ai.google.dev,🤖 AI
+  - DOMAIN-SUFFIX,aistudio.google.com,🤖 AI
+  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,🤖 AI
+  - DOMAIN-SUFFIX,makersuite.google.com,🤖 AI
+  - DOMAIN-SUFFIX,generativeai.google,🤖 AI
+  - DOMAIN,robinfrontend-pa.googleapis.com,🤖 AI
+  - DOMAIN,proactivebackend-pa.googleapis.com,🤖 AI
+  - RULE-SET,Copilot,💻 Copilot
+
+  # 8. 核心国外平台与服务分流
+  - RULE-SET,telegram_ip,🚀 节点选择,no-resolve
+  - DOMAIN-KEYWORD,telegram,🚀 节点选择
+  - DOMAIN-SUFFIX,t.me,🚀 节点选择
+  - DOMAIN-SUFFIX,googlevideo.com,🚀 节点选择
+  - DOMAIN-SUFFIX,google.com,🚀 节点选择
+  - DOMAIN-SUFFIX,googleapis.com,🚀 节点选择
+  - DOMAIN-SUFFIX,gstatic.com,🚀 节点选择
+  - DOMAIN-SUFFIX,youtube.com,🚀 节点选择
+  - DOMAIN-SUFFIX,ytimg.com,🚀 节点选择
+  - DOMAIN-SUFFIX,github.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,github.io,🚀 节点选择
+  - DOMAIN-SUFFIX,ghcr.io,🚀 节点选择
+  - DOMAIN-SUFFIX,jsdelivr.net,🚀 节点选择
+  - DOMAIN-KEYWORD,twitter,🚀 节点选择
+  - DOMAIN-KEYWORD,facebook,🚀 节点选择
+  - DOMAIN-KEYWORD,instagram,🚀 节点选择
+  - DOMAIN-KEYWORD,whatsapp,🚀 节点选择
+  - DOMAIN-KEYWORD,wikipedia,🚀 节点选择
+  - DOMAIN-KEYWORD,discord,🚀 节点选择
+  - DOMAIN-KEYWORD,reddit,🚀 节点选择
+  - DOMAIN-KEYWORD,spotify,🚀 节点选择
+  - DOMAIN-KEYWORD,netflix,🚀 节点选择
+  - DOMAIN-KEYWORD,medium,🚀 节点选择
+  - DOMAIN-KEYWORD,stackoverflow,🚀 节点选择
+  - DOMAIN-SUFFIX,arena.ai,🚀 节点选择
+  - DOMAIN-SUFFIX,grok.com,🚀 节点选择
+  - DOMAIN,clients1.google.com,🚀 节点选择
+  - DOMAIN,clients3.google.com,🚀 节点选择
+  - DOMAIN-SUFFIX,google.cn,🚀 节点选择
+
+  # 9. GFW 与代理列表
+  - RULE-SET,proxy_list,🚀 节点选择
+  - RULE-SET,gfw_list,🚀 节点选择
+
+  # 10. 国内常见服务高优直连（Steam、Office、Bing等）
+  - DOMAIN,cn.bing.com,DIRECT
+  - DOMAIN,b4.cn.bing.com,DIRECT
+  - DOMAIN,cn.api.bing.com,DIRECT
+  - DOMAIN-SUFFIX,bing.cn,DIRECT
+  - DOMAIN-SUFFIX,bing.com.cn,DIRECT
+  - DOMAIN-SUFFIX,steampowered.com,DIRECT
+  - DOMAIN-SUFFIX,steamcommunity.com,DIRECT
+  - DOMAIN-SUFFIX,steamgames.com,DIRECT
+  - DOMAIN-SUFFIX,steamusercontent.com,DIRECT
+  - DOMAIN-SUFFIX,steamcontent.com,DIRECT
+  - DOMAIN-SUFFIX,steamstatic.com,DIRECT
+  - DOMAIN-SUFFIX,steamcdn-a.akamaihd.net,DIRECT
+  - DOMAIN-SUFFIX,steamstore-a.akamaihd.net,DIRECT
+  - DOMAIN-SUFFIX,steamusercontent-a.akamaihd.net,DIRECT
+  - DOMAIN-SUFFIX,steambroadcast.akamaized.net,DIRECT
+  - DOMAIN-SUFFIX,windowsupdate.com,DIRECT
+  - DOMAIN-SUFFIX,windows.com,DIRECT
+  - DOMAIN-SUFFIX,office.com,DIRECT
+  - DOMAIN-SUFFIX,office.net,DIRECT
+  - DOMAIN-SUFFIX,office365.com,DIRECT
+  - DOMAIN-SUFFIX,microsoftonline.com,DIRECT
+  - DOMAIN-SUFFIX,live.com,DIRECT
+  - DOMAIN-SUFFIX,tendawifi.com,DIRECT
+  - DOMAIN-SUFFIX,miwifi.com,DIRECT
+  - DOMAIN-SUFFIX,routerlogin.net,DIRECT
+  - DOMAIN-SUFFIX,iwifi.360.cn,DIRECT
+  - DOMAIN,m.taobao.com,DIRECT
+  - DOMAIN,connect.rom.miui.com,DIRECT
+  - DOMAIN,wifi.vivo.com.cn,DIRECT
+  - DOMAIN-SUFFIX,chinanetcenter.com,DIRECT
+  - DOMAIN-SUFFIX,wswebpic.com,DIRECT
+  - DOMAIN-SUFFIX,msn.cn,DIRECT
+  - DOMAIN-SUFFIX,ntp.org,DIRECT
+  - DOMAIN-SUFFIX,tummy.com,DIRECT
+
+  # 11. 国内全局兜底（结合 tun 的 route-exclude，国内直连完全底层化）
+  - RULE-SET,cn_domain,DIRECT
+  - RULE-SET,cn_ip,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT,no-resolve
+
+  # 12. 最终兜底
+  - MATCH,🐟 漏网之鱼
