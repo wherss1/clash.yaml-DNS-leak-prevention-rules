@@ -346,74 +346,208 @@ proxy-groups:
 rule-anchor:
   mrs_domain: &mrs_domain {type: http, interval: 86400, behavior: domain, format: mrs}
   mrs_ip: &mrs_ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
-  yaml_class: &yaml_class {type: http, interval: 86400, behavior: classical, format: yaml}
   yaml_domain: &yaml_domain {type: http, interval: 86400, behavior: domain, format: yaml}
   text_class: &text_class {type: http, interval: 86400, behavior: classical, format: text}
 
 rule-providers:
   private_domain:
-    <<: *mrs_domain
-    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs"
-    path: ./rules/private.mrs
+    type: inline
+    behavior: domain
+    format: yaml
+    payload:
+      - instant.arubanetworks.com
+      - setmeup.arubanetworks.com
+      - asusrouter.com
+      - router.asus.com
+      - www.asusrouter.com
+      - oasisauth.h3c.com
+      - routerlogin.com
+      - www.routerlogin.com
+      - tplogin.cn
+      - miwifi.com
+      - www.miwifi.com
+      - local.adguard.org
+      - +.internal
+      - +.localdomain
+      - +.example
+      - +.invalid
+      - +.localhost
+      - +.test
+      - +.local
+      - +.lan
+      - +.router.ctc
+      - +.my.router
+      - +.home.arpa
+      - +.zte.home
+      - +.tplinkwifi.net
+      - +.tendawifi.com
+      - +.plex.direct
+      - +.hiwifi.com
+      - +.phicomm.me
+      - +.peiluyou.com
+      - +.ts.net
+      - +.leike.cc
+      - +.kis.v2.scr.kaspersky-labs.com
+      - +.localhost.ptlogin2.qq.com
+      - +.localhost.sec.qq.com
 
   cn_domain:
     <<: *mrs_domain
-    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs"
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"
     path: ./rules/cn.mrs
 
   cn_ip:
     <<: *mrs_ip
-    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs"
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs"
     path: ./rules/cn_ip.mrs
 
   telegram_ip:
-    <<: *mrs_ip
-    url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.mrs"
-    path: ./rules/telegram.mrs
+    type: inline
+    behavior: ipcidr
+    format: yaml
+    payload:
+      - 91.105.192.0/23
+      - 91.108.4.0/22
+      - 91.108.8.0/21
+      - 91.108.16.0/21
+      - 91.108.56.0/22
+      - 95.161.64.0/20
+      - 149.154.160.0/20
+      - 185.76.151.0/24
+      - 2001:67c:4e8::/48
+      - 2001:b28:f23c::/47
+      - 2001:b28:f23f::/48
+      - 2a0a:f280::/32
 
   OpenAI:
-    <<: *yaml_class
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml"
-    path: ./rules/OpenAI.yaml
+    type: inline
+    behavior: classical
+    format: yaml
+    payload:
+      - DOMAIN,browser-intake-datadoghq.com
+      - DOMAIN,chat.openai.com.cdn.cloudflare.net
+      - DOMAIN,openai-api.arkoselabs.com
+      - DOMAIN,openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net
+      - DOMAIN,openaicomproductionae4b.blob.core.windows.net
+      - DOMAIN,production-openaicom-storage.azureedge.net
+      - DOMAIN,static.cloudflareinsights.com
+      - DOMAIN-SUFFIX,ai.com
+      - DOMAIN-SUFFIX,algolia.net
+      - DOMAIN-SUFFIX,api.statsig.com
+      - DOMAIN-SUFFIX,auth0.com
+      - DOMAIN-SUFFIX,chatgpt.com
+      - DOMAIN-SUFFIX,chatgpt.livekit.cloud
+      - DOMAIN-SUFFIX,client-api.arkoselabs.com
+      - DOMAIN-SUFFIX,events.statsigapi.net
+      - DOMAIN-SUFFIX,featuregates.org
+      - DOMAIN-SUFFIX,host.livekit.cloud
+      - DOMAIN-SUFFIX,identrust.com
+      - DOMAIN-SUFFIX,intercom.io
+      - DOMAIN-SUFFIX,intercomcdn.com
+      - DOMAIN-SUFFIX,launchdarkly.com
+      - DOMAIN-SUFFIX,oaistatic.com
+      - DOMAIN-SUFFIX,oaiusercontent.com
+      - DOMAIN-SUFFIX,observeit.net
+      - DOMAIN-SUFFIX,openai.com
+      - DOMAIN-SUFFIX,openaiapi-site.azureedge.net
+      - DOMAIN-SUFFIX,openaicom.imgix.net
+      - DOMAIN-SUFFIX,segment.io
+      - DOMAIN-SUFFIX,sentry.io
+      - DOMAIN-SUFFIX,stripe.com
+      - DOMAIN-SUFFIX,turn.livekit.cloud
+      - DOMAIN-KEYWORD,openai
+      - IP-CIDR,24.199.123.28/32
+      - IP-CIDR,64.23.132.171/32
 
   Claude:
-    <<: *yaml_class
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Claude/Claude.yaml"
-    path: ./rules/Claude.yaml
+    type: inline
+    behavior: classical
+    format: yaml
+    payload:
+      - DOMAIN,cdn.usefathom.com
+      - DOMAIN-SUFFIX,anthropic.com
+      - DOMAIN-SUFFIX,claude.ai
 
   Gemini:
-    <<: *yaml_class
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Gemini/Gemini.yaml"
-    path: ./rules/Gemini.yaml
+    type: inline
+    behavior: classical
+    format: yaml
+    payload:
+      - DOMAIN,ai.google.dev
+      - DOMAIN,alkalimakersuite-pa.clients6.google.com
+      - DOMAIN,makersuite.google.com
+      - DOMAIN-SUFFIX,bard.google.com
+      - DOMAIN-SUFFIX,deepmind.com
+      - DOMAIN-SUFFIX,deepmind.google
+      - DOMAIN-SUFFIX,gemini.google.com
+      - DOMAIN-SUFFIX,generativeai.google
+      - DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com
+      - DOMAIN-SUFFIX,apis.google.com
+      - DOMAIN-KEYWORD,colab
+      - DOMAIN-KEYWORD,developerprofiles
+      - DOMAIN-KEYWORD,generativelanguage
 
   Copilot:
-    <<: *yaml_class
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Copilot/Copilot.yaml"
-    path: ./rules/Copilot.yaml
-
-  proxy_list:
-    <<: *yaml_domain
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Proxy/Proxy_Domain.yaml"
-    path: ./rules/Proxy_Domain.yaml
+    type: inline
+    behavior: classical
+    format: yaml
+    payload:
+      # --- Copilot 应用本体（新版端点）---
+      - DOMAIN-SUFFIX,cloud.microsoft
+      - DOMAIN,copilot.microsoft.com
+      - DOMAIN-SUFFIX,api.microsoftapp.net
+      - DOMAIN-SUFFIX,island.powerapps.com
+      # --- M365 Copilot / BizChat 实时通道（实测真实端点）---
+      - DOMAIN-SUFFIX,trouter.skype.com
+      - DOMAIN-SUFFIX,config.edge.skype.com
+      - DOMAIN,teams.microsoft.com
+      - DOMAIN-SUFFIX,substrate.office.com
+      # --- Bing / Copilot 网页版 ---
+      - DOMAIN,www.bing.com
+      - DOMAIN,r.bing.com
+      - DOMAIN,sydney.bing.com
+      - DOMAIN-SUFFIX,edgeservices.bing.com
+      - DOMAIN,services.bingapis.com
+      # --- msn 内容源 ---
+      - DOMAIN,api.msn.com
+      - DOMAIN,assets.msn.com
+      # --- 微软侧辅助 ---
+      - DOMAIN,location.microsoft.com
+      - DOMAIN,self.events.data.microsoft.com
+      - DOMAIN,odc.officeapps.live.com
+      - DOMAIN,in.appcenter.ms
+      - DOMAIN,gateway.bingviz.microsoft.net
+      - DOMAIN,gateway.bingviz.microsoftapp.net
+      - DOMAIN-SUFFIX,bing-shopping.microsoft-falcon.io
+      # --- 人机验证 / 遥测 ---
+      - DOMAIN-SUFFIX,challenges.cloudflare.com
+      - DOMAIN,browser-intake-datadoghq.com
 
   gfw_list:
     <<: *text_class
-    url: "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ProxyGFWlist.list"
-    path: ./rules/ProxyGFWlist.list
+    url: "https://raw.githubusercontent.com/wherss1/Proxy_GFW_Merged/refs/heads/main/Proxy_GFW_Merged.list"
+    path: ./rules/Proxy_GFW_Merged.list
 
   reject_list:
     <<: *yaml_domain
-    url: "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt"
+    url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt"
     path: ./rules/reject.yaml
 
 # ============================================================
 # 规则匹配 (Rules)
 # ============================================================
 rules:
-  # 1. QUIC 流量拦截（强制回退 TCP 保证网页与视频丝滑秒开）
+  # 1. QUIC 流量拦截
   - AND,((DST-PORT,443),(NETWORK,UDP)),REJECT
 
-  # 2. 广告拦截
+  # 2. 360 路由器管理页直连
+  - DOMAIN-SUFFIX,iwifi.360.cn,DIRECT
+
+  # 3. QQ/微信本地登录回调放行（必须位于下方 DOMAIN-KEYWORD,localhost 之前）
+  - DOMAIN,localhost.ptlogin2.qq.com,DIRECT
+  - DOMAIN,localhost.sec.qq.com,DIRECT
+
+  # 4. 广告拦截
   - RULE-SET,reject_list,REJECT
   - DOMAIN-SUFFIX,teg.tencent-cloud.net,REJECT
   - DOMAIN-SUFFIX,comfylink.com,REJECT
@@ -434,7 +568,7 @@ rules:
   - DOMAIN-SUFFIX,feedback.zcode-ai.com,REJECT
   - DOMAIN-KEYWORD,localhost,REJECT
 
-  # 3. 路由器内网管理拦截/直连防御
+  # 5. 路由器内网管理拦截
   - DOMAIN-SUFFIX,tenda.com.cn,REJECT
   - DOMAIN-SUFFIX,netcore.com.cn,REJECT
   - DOMAIN-SUFFIX,mercury.com.cn,REJECT
@@ -446,8 +580,12 @@ rules:
   - DOMAIN-SUFFIX,linksys.com,REJECT
   - DOMAIN-SUFFIX,wlink.qy.net,REJECT
 
-  # 4. 私有与内网地址（直连，免触发 DNS 污染）
+  # 6. 私有与内网地址（直连）
   - RULE-SET,private_domain,DIRECT
+  # 5.1 字节内网域名直连（公共 DNS 解析不了内网记录；完全不用字节服务可删除这三行）
+  - DOMAIN-SUFFIX,byted.org,DIRECT
+  - DOMAIN-SUFFIX,bytedance.net,DIRECT
+  - DOMAIN-SUFFIX,bytedance.com,DIRECT
   - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
   - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
   - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
@@ -456,12 +594,11 @@ rules:
   - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
   - IP-CIDR,224.0.0.0/4,DIRECT,no-resolve
   - IP-CIDR,240.0.0.0/4,DIRECT,no-resolve
-  - IP-CIDR,255.255.255.255/32,DIRECT,no-resolve
   - IP-CIDR6,::1/128,DIRECT,no-resolve
   - IP-CIDR6,fc00::/7,DIRECT,no-resolve
   - IP-CIDR6,fe80::/10,DIRECT,no-resolve
 
-  # 5. 网络连通性测试与核心 DNS 服务器（直连）
+  # 7. 网络连通性测试与核心 DNS 服务器（直连）
   - DOMAIN,connectivitycheck.android.com,DIRECT
   - DOMAIN,connectivitycheck.gstatic.com,DIRECT
   - DOMAIN,detectportal.firefox.com,DIRECT
@@ -475,79 +612,44 @@ rules:
   - DOMAIN-SUFFIX,dnspod.cn,DIRECT
   - IP-CIDR,119.29.29.29/32,DIRECT,no-resolve
   - IP-CIDR,223.5.5.5/32,DIRECT,no-resolve
+  - IP-CIDR,120.53.53.53/32,DIRECT,no-resolve
   - IP-CIDR,114.114.114.114/32,DIRECT,no-resolve
   - IP-CIDR6,2400:3200::1/128,DIRECT,no-resolve
   - IP-CIDR6,2402:4e00::/128,DIRECT,no-resolve
 
-  # 6. 特殊国内域名代理（优先级高，防误判直连）
+  # 8. 特殊国内域名代理
   - DOMAIN-SUFFIX,translate.zvo.cn,🚀 节点选择
   - DOMAIN-SUFFIX,yjbrowser.cn,🚀 节点选择
   - DOMAIN-SUFFIX,modujx11.com,🚀 节点选择
   - DOMAIN-SUFFIX,gszyi.com,🚀 节点选择
   - DOMAIN-SUFFIX,ymuuy.com,🚀 节点选择
-  - DOMAIN,bf.modujx11.com,🚀 节点选择
-  - DOMAIN,gs.gszyi.com,🚀 节点选择
-  - DOMAIN,hnts.ymuuy.com,🚀 节点选择
   - DOMAIN-SUFFIX,gstatic.cn,🚀 节点选择
   - DOMAIN-SUFFIX,googleapis.cn,🚀 节点选择
   - DOMAIN,client.wns.windows.com,🚀 节点选择
 
-  # 7. AI 服务分流匹配
+  # 9. AI 服务分流
   - RULE-SET,OpenAI,🤖 AI
   - RULE-SET,Claude,🤖 AI
   - RULE-SET,Gemini,🤖 AI
-  - DOMAIN-KEYWORD,openai,🤖 AI
+  # Gemini / AI Studio 共用基础设施：须与 AI 组同地区出口，否则跨地区校验冲突
+  - DOMAIN-SUFFIX,googletagmanager.com,🤖 AI
+  - DOMAIN-SUFFIX,google-analytics.com,🤖 AI
+  - DOMAIN-SUFFIX,googleusercontent.com,🤖 AI
+  - DOMAIN-SUFFIX,clients6.google.com,🤖 AI
+  - DOMAIN,accounts.google.com,🤖 AI
+  - DOMAIN,play.google.com,🤖 AI
+  - DOMAIN-SUFFIX,gstatic.com,🤖 AI
   - DOMAIN-KEYWORD,chatgpt,🤖 AI
   - DOMAIN-KEYWORD,anthropic,🤖 AI
   - DOMAIN-KEYWORD,claude,🤖 AI
   - DOMAIN-KEYWORD,gemini,🤖 AI
   - DOMAIN-SUFFIX,ai.google.dev,🤖 AI
   - DOMAIN-SUFFIX,aistudio.google.com,🤖 AI
-  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI
-  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,🤖 AI
   - DOMAIN-SUFFIX,makersuite.google.com,🤖 AI
-  - DOMAIN-SUFFIX,generativeai.google,🤖 AI
   - DOMAIN,robinfrontend-pa.googleapis.com,🤖 AI
-  - DOMAIN,proactivebackend-pa.googleapis.com,🤖 AI
   - RULE-SET,Copilot,💻 Copilot
 
-  # 8. 核心国外平台与服务分流
-  - RULE-SET,telegram_ip,🚀 节点选择,no-resolve
-  - DOMAIN-KEYWORD,telegram,🚀 节点选择
-  - DOMAIN-SUFFIX,t.me,🚀 节点选择
-  - DOMAIN-SUFFIX,googlevideo.com,🚀 节点选择
-  - DOMAIN-SUFFIX,google.com,🚀 节点选择
-  - DOMAIN-SUFFIX,googleapis.com,🚀 节点选择
-  - DOMAIN-SUFFIX,gstatic.com,🚀 节点选择
-  - DOMAIN-SUFFIX,youtube.com,🚀 节点选择
-  - DOMAIN-SUFFIX,ytimg.com,🚀 节点选择
-  - DOMAIN-SUFFIX,github.com,🚀 节点选择
-  - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
-  - DOMAIN-SUFFIX,github.io,🚀 节点选择
-  - DOMAIN-SUFFIX,ghcr.io,🚀 节点选择
-  - DOMAIN-SUFFIX,jsdelivr.net,🚀 节点选择
-  - DOMAIN-KEYWORD,twitter,🚀 节点选择
-  - DOMAIN-KEYWORD,facebook,🚀 节点选择
-  - DOMAIN-KEYWORD,instagram,🚀 节点选择
-  - DOMAIN-KEYWORD,whatsapp,🚀 节点选择
-  - DOMAIN-KEYWORD,wikipedia,🚀 节点选择
-  - DOMAIN-KEYWORD,discord,🚀 节点选择
-  - DOMAIN-KEYWORD,reddit,🚀 节点选择
-  - DOMAIN-KEYWORD,spotify,🚀 节点选择
-  - DOMAIN-KEYWORD,netflix,🚀 节点选择
-  - DOMAIN-KEYWORD,medium,🚀 节点选择
-  - DOMAIN-KEYWORD,stackoverflow,🚀 节点选择
-  - DOMAIN-SUFFIX,arena.ai,🚀 节点选择
-  - DOMAIN-SUFFIX,grok.com,🚀 节点选择
-  - DOMAIN,clients1.google.com,🚀 节点选择
-  - DOMAIN,clients3.google.com,🚀 节点选择
-  - DOMAIN-SUFFIX,google.cn,🚀 节点选择
-
-  # 9. GFW 与代理列表
-  - RULE-SET,proxy_list,🚀 节点选择
-  - RULE-SET,gfw_list,🚀 节点选择
-
-  # 10. 国内常见服务高优直连（Steam、Office、Bing等）
+  # 10. 国内常见服务高优直连
   - DOMAIN,cn.bing.com,DIRECT
   - DOMAIN,b4.cn.bing.com,DIRECT
   - DOMAIN,cn.api.bing.com,DIRECT
@@ -570,10 +672,8 @@ rules:
   - DOMAIN-SUFFIX,office365.com,DIRECT
   - DOMAIN-SUFFIX,microsoftonline.com,DIRECT
   - DOMAIN-SUFFIX,live.com,DIRECT
-  - DOMAIN-SUFFIX,tendawifi.com,DIRECT
   - DOMAIN-SUFFIX,miwifi.com,DIRECT
   - DOMAIN-SUFFIX,routerlogin.net,DIRECT
-  - DOMAIN-SUFFIX,iwifi.360.cn,DIRECT
   - DOMAIN,m.taobao.com,DIRECT
   - DOMAIN,connect.rom.miui.com,DIRECT
   - DOMAIN,wifi.vivo.com.cn,DIRECT
@@ -582,11 +682,42 @@ rules:
   - DOMAIN-SUFFIX,msn.cn,DIRECT
   - DOMAIN-SUFFIX,ntp.org,DIRECT
   - DOMAIN-SUFFIX,tummy.com,DIRECT
+  - DOMAIN-SUFFIX,microsoft.com,DIRECT
+  - DOMAIN-SUFFIX,msn.com,DIRECT
+  - DOMAIN-SUFFIX,speedtest.net,DIRECT
+  - DOMAIN-SUFFIX,ooklaserver.net,DIRECT
 
-  # 11. 国内全局兜底（结合 tun 的 route-exclude，国内直连完全底层化）
+  # 11. 核心国外平台与服务分流
+  - RULE-SET,telegram_ip,🚀 节点选择,no-resolve
+  - DOMAIN-SUFFIX,t.me,🚀 节点选择
+  - DOMAIN-SUFFIX,googlevideo.com,🚀 节点选择
+  - DOMAIN-SUFFIX,google.com,🚀 节点选择
+  - DOMAIN-SUFFIX,googleapis.com,🚀 节点选择
+  - DOMAIN-SUFFIX,gstatic.com,🚀 节点选择
+  - DOMAIN-SUFFIX,youtube.com,🚀 节点选择
+  - DOMAIN-SUFFIX,ytimg.com,🚀 节点选择
+  - DOMAIN-SUFFIX,github.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,github.io,🚀 节点选择
+  - DOMAIN-SUFFIX,ghcr.io,🚀 节点选择
+  - DOMAIN-SUFFIX,jsdelivr.net,🚀 节点选择
+  - DOMAIN-KEYWORD,wikipedia,🚀 节点选择
+  - DOMAIN-KEYWORD,discord,🚀 节点选择
+  - DOMAIN-KEYWORD,reddit,🚀 节点选择
+  - DOMAIN-KEYWORD,netflix,🚀 节点选择
+  - DOMAIN-KEYWORD,medium,🚀 节点选择
+  - DOMAIN-KEYWORD,stackoverflow,🚀 节点选择
+  - DOMAIN-SUFFIX,arena.ai,🚀 节点选择
+  - DOMAIN-SUFFIX,grok.com,🚀 节点选择
+  - DOMAIN-SUFFIX,google.cn,🚀 节点选择
+
+  # 12. GFW 与代理列表
+  - RULE-SET,gfw_list,🚀 节点选择
+
+  # 13. 国内全局兜底
   - RULE-SET,cn_domain,DIRECT
   - RULE-SET,cn_ip,DIRECT,no-resolve
   - GEOIP,CN,DIRECT,no-resolve
 
-  # 12. 最终兜底
+  # 14. 最终兜底
   - MATCH,🐟 漏网之鱼
