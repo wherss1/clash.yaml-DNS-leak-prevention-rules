@@ -313,7 +313,7 @@ proxy-groups:
   - name: "🤖 AI"
     type: url-test
     url: https://cp.cloudflare.com/generate_204
-    interval: 120
+    interval: 300
     timeout: 2500
     tolerance: 50
     lazy: true
@@ -322,21 +322,21 @@ proxy-groups:
     exclude-filter: "(?i)港|HK|HongKong|2x|3x|aws-link|127\\.0\\.0\\.1|localhost"
 
   - name: "💻 Copilot"
-    type: url-test
-    url: https://www.gstatic.com/generate_204
-    interval: 180
-    timeout: 5000
-    tolerance: 60
-    lazy: true
-    use: *my_providers
-    filter: "(?i)港|HK|HongKong|台|TW|Taiwan|日|JP|Japan|美|US|Singapore|新|SG"
-    exclude-filter: "(?i)2x|3x|aws-link|127\\.0\\.0\\.1|localhost"
+    type: select
+    proxies:
+      - "♻️ 香港自动"
+      - "♻️ 狮城自动"
+      - "♻️ 日本自动"
+      - "♻️ 台湾自动"
+      - "♻️ 美国自动"
+      - "♻️ 韩国自动"
+      - "♻️ 全部自动"
 
   # --- 兜底 ---
   - name: "🐟 漏网之鱼"
     type: select
     proxies:
-      - "♻️ 全部自动"
+      - "🚀 节点选择"
       - "直连"
       - REJECT
 
@@ -648,6 +648,13 @@ rules:
   - DOMAIN-SUFFIX,makersuite.google.com,🤖 AI
   - DOMAIN,robinfrontend-pa.googleapis.com,🤖 AI
   - RULE-SET,Copilot,💻 Copilot
+  # 微软登录域必须与 Copilot 主站同出口（须在下方 office/live/microsoftonline DIRECT 之前生效）
+  - DOMAIN-SUFFIX,microsoftonline.com,💻 Copilot
+  - DOMAIN-SUFFIX,live.com,💻 Copilot
+  - DOMAIN-SUFFIX,msauth.net,💻 Copilot
+  - DOMAIN-SUFFIX,msftauth.net,💻 Copilot
+  - DOMAIN-SUFFIX,msidentity.com,💻 Copilot
+  - DOMAIN,logincdn.ms,💻 Copilot
 
   # 10. 国内常见服务高优直连
   - DOMAIN,cn.bing.com,DIRECT
